@@ -50,8 +50,9 @@ module "eks" {
   vpc_id              = module.vpc.vpc_id
   private_subnet_ids  = module.vpc.private_subnet_ids
   node_instance_types = ["t3.medium"]
-  desired_size        = 2
-  min_size            = 1
+  # Room for kube-prometheus-stack later; 2 nodes is already tight with Argo + app.
+  desired_size        = 3
+  min_size            = 2
   max_size            = 3
 }
 
