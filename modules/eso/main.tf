@@ -50,7 +50,12 @@ resource "helm_release" "this" {
   chart            = "external-secrets"
   namespace        = var.namespace
   create_namespace = true
-  timeout          = 300
+  wait             = true
+  timeout          = 600
+  cleanup_on_fail  = true
+  # First apply can create the Helm release in-cluster then fail Terraform state.
+  # Next apply must upgrade that leftover release instead of helm install (name in use).
+  upgrade_install  = true
 
   set = [
     {

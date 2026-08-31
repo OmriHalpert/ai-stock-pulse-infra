@@ -60,7 +60,10 @@ resource "helm_release" "this" {
   chart            = "external-dns"
   namespace        = var.namespace
   create_namespace = true
-  timeout          = 300
+  wait             = true
+  timeout          = 600
+  cleanup_on_fail  = true
+  upgrade_install  = true
 
   set = [
     {

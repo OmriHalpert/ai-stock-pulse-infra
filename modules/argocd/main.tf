@@ -4,6 +4,10 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   namespace        = "argocd"
   create_namespace = true
+  wait             = true
+  timeout          = 600
+  cleanup_on_fail  = true
+  upgrade_install  = true
 
   values = [
     yamlencode({
@@ -29,35 +33,32 @@ resource "helm_release" "argocd" {
             username = "x-access-token"
             password = var.github_pat
           }
-        },
-        {
-          apiVersion = "argoproj.io/v1alpha1"
-          kind       = "Application"
-          metadata = {
-            name       = "root-app"
-            namespace  = "argocd"
-            finalizers = ["resources-finalizer.argocd.argoproj.io"]
-          }
-          spec = {
-            project = "default"
-            source = {
-              repoURL        = var.manifests_repo_url
-              targetRevision = "main"
-              path           = "apps"
-            }
-            destination = {
-              server    = "https://kubernetes.default.svc"
-              namespace = "argocd"
-            }
-            syncPolicy = {
-              automated = {
-                prune    = true
-                selfHeal = true
-              }
-            }
-          }
         }
       ]
     })
   ]
+}
+
+# Application CRD is installed by the argo-cd chart. Putting kind: Application in
+# extraObjects on the same release fails first apply (API discovery has no mapping yet).
+resource "helm_release" "root_app" {
+  name                       = "root-app"
+  chart                      = "${path.module}/charts/root-app"
+  namespace                  = "argocd"
+  wait                       = true
+  # Destroy waits on Argo's cascade (Ingress + ALB). 120s is too short for that.
+  timeout                    = 600
+  cleanup_on_fail            = true
+  upgrade_install            = true
+  disable_openapi_validation = true
+
+  values = [
+    yamlencode({
+      repoURL        = var.manifests_repo_url
+      targetRevision = "main"
+      path           = "apps"
+    })
+  ]
+
+  depends_on = [helm_release.argocd]
 }

@@ -64,16 +64,6 @@ module "rds" {
   eks_nodes_security_group_id = module.eks.node_security_group_id
 }
 
-module "argocd" {
-  source      = "../../modules/argocd"
-  environment = local.environment
-
-  manifests_repo_url = "https://github.com/OmriHalpert/ai-stock-pulse-manifests.git"
-  github_pat         = data.aws_secretsmanager_secret_version.argocd_github_pat.secret_string
-
-  depends_on = [module.eks]
-}
-
 module "albc" {
   source                 = "../../modules/albc"
   cluster_name           = module.eks.cluster_name
@@ -102,7 +92,7 @@ module "eso" {
     data.aws_secretsmanager_secret.app.arn
   ]
 
-  depends_on = [module.eks]
+  depends_on = [module.eks, module.albc]
 }
 
 module "external_dns" {
@@ -113,5 +103,17 @@ module "external_dns" {
   oidc_provider     = module.eks.oidc_provider
   route53_zone_id   = data.aws_route53_zone.primary.zone_id
 
-  depends_on = [module.eks]
+  depends_on = [module.eks, module.albc]
+}
+
+# After ALBC (Ingress webhook) and ESO (ExternalSecret CRDs) so the first GitOps
+# sync does not race empty webhooks/CRDs. Destroy reverses this: apps first, then ALBC.
+module "argocd" {
+  source      = "../../modules/argocd"
+  environment = local.environment
+
+  manifests_repo_url = "https://github.com/OmriHalpert/ai-stock-pulse-manifests.git"
+  github_pat         = data.aws_secretsmanager_secret_version.argocd_github_pat.secret_string
+
+  depends_on = [module.eks, module.albc, module.eso, module.external_dns]
 }
