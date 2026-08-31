@@ -53,9 +53,6 @@ resource "helm_release" "this" {
   wait             = true
   timeout          = 600
   cleanup_on_fail  = true
-  # First apply can create the Helm release in-cluster then fail Terraform state.
-  # Next apply must upgrade that leftover release instead of helm install (name in use).
-  upgrade_install  = true
 
   set = [
     {

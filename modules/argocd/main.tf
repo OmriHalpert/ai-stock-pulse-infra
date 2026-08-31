@@ -7,7 +7,6 @@ resource "helm_release" "argocd" {
   wait             = true
   timeout          = 600
   cleanup_on_fail  = true
-  upgrade_install  = true
 
   values = [
     yamlencode({
@@ -49,7 +48,6 @@ resource "helm_release" "root_app" {
   # Destroy waits on Argo's cascade (Ingress + ALB). 120s is too short for that.
   timeout                    = 600
   cleanup_on_fail            = true
-  upgrade_install            = true
   disable_openapi_validation = true
 
   values = [

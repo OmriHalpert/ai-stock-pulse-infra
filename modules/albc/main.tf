@@ -7,7 +7,6 @@ resource "helm_release" "aws_load_balancer_controller" {
   wait            = true
   timeout         = 600
   cleanup_on_fail = true
-  upgrade_install = true
 
   set = [
     {

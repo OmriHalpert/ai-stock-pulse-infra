@@ -63,7 +63,6 @@ resource "helm_release" "this" {
   wait             = true
   timeout          = 600
   cleanup_on_fail  = true
-  upgrade_install  = true
 
   set = [
     {
