@@ -27,3 +27,8 @@ output "gha_ecr_role_arn" {
   description = "IAM role for GitHub Actions to push to ECR"
   value       = module.gha_ecr.role_arn
 }
+
+output "argocd_github_pat_secret_name" {
+  description = "Secrets Manager secret name holding the Argo CD GitHub PAT"
+  value       = aws_secretsmanager_secret.argocd_github_pat.name
+}

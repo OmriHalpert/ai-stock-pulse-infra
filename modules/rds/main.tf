@@ -46,7 +46,7 @@ resource "random_password" "master" {
 
 # 4. Store DB Credentials in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "db_credentials" {
-  name_prefix             = "${var.project_name}-${var.environment}-db-secret-"
+  name                    = "${var.project_name}-${var.environment}-db-secret"
   recovery_window_in_days = 0 # Immediate deletion on destroy for dev environments
 
   tags = {

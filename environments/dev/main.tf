@@ -24,6 +24,10 @@ data "aws_ecr_repository" "repos" {
   name     = each.value
 }
 
+data "aws_secretsmanager_secret_version" "argocd_github_pat" {
+  secret_id = "ai-stock-pulse-argocd-github-pat"
+}
+
 # -----------------------------------------------------------------------------
 # Ephemeral compute stack
 # -----------------------------------------------------------------------------
@@ -63,6 +67,9 @@ module "rds" {
 module "argocd" {
   source      = "../../modules/argocd"
   environment = local.environment
+
+  manifests_repo_url = "https://github.com/OmriHalpert/ai-stock-pulse-manifests.git"
+  github_pat         = data.aws_secretsmanager_secret_version.argocd_github_pat.secret_string
 
   depends_on = [module.eks]
 }

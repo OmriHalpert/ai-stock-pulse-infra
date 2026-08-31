@@ -22,3 +22,12 @@ module "gha_ecr" {
   github_repo_id  = "1339536242"
   ecr_repository_arns = values(module.ecr.repository_arns)
 }
+
+# Value is set once outside Terraform (never committed):
+# aws secretsmanager put-secret-value \
+#   --secret-id ai-stock-pulse-argocd-github-pat \
+#   --secret-string 'YOUR_GITHUB_PAT'
+resource "aws_secretsmanager_secret" "argocd_github_pat" {
+  name        = "ai-stock-pulse-argocd-github-pat"
+  description = "GitHub PAT for Argo CD to clone ai-stock-pulse-manifests"
+}

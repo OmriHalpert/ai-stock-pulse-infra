@@ -43,3 +43,25 @@ resource "aws_iam_role_policy_attachment" "this" {
   role       = aws_iam_role.this.name
   policy_arn = aws_iam_policy.this.arn
 }
+
+resource "helm_release" "this" {
+  name             = "external-secrets"
+  repository       = "https://charts.external-secrets.io"
+  chart            = "external-secrets"
+  namespace        = var.namespace
+  create_namespace = true
+  timeout          = 300
+
+  set = [
+    {
+      name  = "serviceAccount.name"
+      value = var.service_account_name
+    },
+    {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = aws_iam_role.this.arn
+    }
+  ]
+
+  depends_on = [aws_iam_role_policy_attachment.this]
+}
