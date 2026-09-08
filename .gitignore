@@ -3,8 +3,13 @@
 *.tfstate
 *.tfstate.*
 *.tfstate.backup
+errored.tfstate
 crash.log
 crash.*.log
+.env
+kubeconfig
+kubeconfig-*
+*.pem
 
 # Override and secret files
 *.tfvars
